@@ -9,15 +9,15 @@ const HEIGHT = 600;
 const rows = HEIGHT / CELL_SIZE;
 const cols = WIDTH / CELL_SIZE;
 
-const Cell = (x,y) => {
-        return (
-            <div className="Cell" style={{
-                left: `${CELL_SIZE * x + 1}px`,
-                top: `${CELL_SIZE * y + 1}px`,
-                width: `${CELL_SIZE - 1}px`,
-                height: `${CELL_SIZE - 1}px`,
-            }} />
-        );
+const Cell = ({x, y}) => {
+    return (
+        <div className="Cell" style={{
+            left: `${CELL_SIZE * x + 1}px`,
+            top: `${CELL_SIZE * y + 1}px`,
+            width: `${CELL_SIZE - 1}px`,
+            height: `${CELL_SIZE - 1}px`,
+        }} />
+    );
 }
 
 
@@ -26,31 +26,18 @@ const Game3 = () => {
     const [isRunning, setIsRunning] = useState(false);
     const [interval, setInterval] = useState(100);
     const [board, setBoard] = useState([]);
-    // const [x, setX] = useState(0)
-    // const [y, setY] = useState(0)
     const operations = [[-1, -1], [-1, 0], [-1, 1], [0, 1], [1, 1], [1, 0], [1, -1], [0, -1]];
-    // const boardRef = useRef(null)
-
-
 
     const makeEmptyBoard = () =>{
-        let board = [];
         for (let y = 0; y < rows; y++) {
             board[y] = [];
             for (let x = 0; x < cols; x++) {
-                board[y][x] = false;
+               const a =  board[y][x] = false;
+               setBoard(a);
             }
         }
-
-        return setBoard(board);
+        
     }
-
-    // const getElementOffset = () =>{
-    //     const rect = boardRef.getBoundingClientRect();
-    //     setX(rect.x);
-    //     setY(rect.y);
-    // };
-
 
     const makeCells = () =>{
         let cells = [];
@@ -61,12 +48,12 @@ const Game3 = () => {
                 }
             }
         }
-
-        return cells;
+        setCells(cells)
+        console.log(cells);
     }
 
     const handleClick = () => {
-        setIsRunning(!isRunning)
+        setIsRunning(true)
         if (isRunning) {
           handleRandom()
           runGame()
@@ -99,17 +86,20 @@ const Game3 = () => {
 
             if (board[y][x]) {
                 if (neighbors === 2 || neighbors === 3) {
-                  newBoard[y][x] = true;
+                  let newBoardxy = newBoard[y][x] = true;
+                  setBoard(newBoardxy)
                 } else {
-                  newBoard[y][x] = false;
+                    let newBoardxy = newBoard[y][x] = false;
+                    setBoard(newBoardxy)
                 }
             } else {
                 if (!board[y][x] && neighbors === 3) {
-                  newBoard[y][x] = true;
+                    let newBoardxy = newBoard[y][x] = true;
+                    setBoard(newBoardxy)
                 }
             }
         }
-        setBoard(newBoard)
+        
         const cells = () => makeCells()
         setCells(cells)
 
@@ -139,7 +129,7 @@ const Game3 = () => {
     }
 
     const handleClear = () => {
-        const board = () => makeEmptyBoard();
+        makeEmptyBoard();
         const cells = () => makeCells()
         setCells(cells)
     }
@@ -147,16 +137,15 @@ const Game3 = () => {
     const handleRandom = () => {
         for (let y = 0; y < rows; y++) {
             for (let x = 0; x < cols; x++) {
-                board[y][x] = (Math.random() >= 0.5);
-                setCells(board[y][x])
+                let cells = board[y][x] = (Math.random() >= 0.5);
+                setCells(cells)
             }
         }
 
-        const cells = () => makeCells()
+        makeCells()
        
     }
     
-    console.log(cells);
     return (
         <div>
             <div className="Board"
