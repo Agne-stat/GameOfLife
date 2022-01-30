@@ -29,6 +29,7 @@ class Game extends React.Component {
     this.cols = WIDTH / CELL_SIZE;
 
     this.board = this.makeEmptyBoard();
+    this.operations = [[-1, -1], [-1, 0], [-1, 1], [0, 1], [1, 1], [1, 0], [1, -1], [0, -1]];
   }
 
   state = {
@@ -49,16 +50,6 @@ class Game extends React.Component {
     return board;
   }
 
-  getElementOffset() {
-    const rect = this.boardRef.getBoundingClientRect();
-    const doc = document.documentElement;
-
-    return {
-      x: rect.left + window.pageXOffset - doc.clientLeft,
-      y: rect.top + window.pageYOffset - doc.clientTop
-    };
-  }
-
   makeCells() {
     let cells = [];
     for (let y = 0; y < this.rows; y++) {
@@ -72,8 +63,15 @@ class Game extends React.Component {
     return cells;
   }
 
-  handleClick = (event) => {
-    /*** Handle Click Code ***/
+  handleClick = () => {
+    const currentState = this.state.isRunning
+    this.setState({ isRunning: !currentState });
+    if (!currentState) {
+      this.handleRandom()
+      this.runGame()
+    } else {
+      this.stopGame()
+    } 
   };
 
   runGame = () => {
@@ -92,8 +90,23 @@ class Game extends React.Component {
   runIteration() {
     let newBoard = this.makeEmptyBoard();
 
-    /*** Add Code Here ***/
-    /******/
+    for (let y = 0; y < this.rows; y++) {
+      for (let x = 0; x < this.cols; x++) {
+        let neighbors = this.calculateNeighbors(this.board, x, y);
+
+          if (this.board[y][x]) {
+              if (neighbors === 2 || neighbors === 3) {
+                  newBoard[y][x] = true;
+              } else {
+                  newBoard[y][x] = false;
+              }
+          } else {
+              if (!this.board[y][x] && neighbors === 3) {
+                  newBoard[y][x] = true;
+              }
+          }
+      }
+  }
     this.board = newBoard;
     this.setState({ cells: this.makeCells() });
 
@@ -104,8 +117,14 @@ class Game extends React.Component {
 
   calculateNeighbors(board, x, y) {
     let neighbors = 0;
-    /*** Add Code Here ***/
-    /******/
+    for (let i = 0; i < this.operations.length; i++) {
+      let y1 = y + this.operations[i][0];
+      let x1 = x + this.operations[i][1];
+
+      if (x1 >= 0 && x1 < this.cols && y1 >= 0 && y1 < this.rows ) {
+        neighbors += board[y1][x1];
+      }
+    }
     return neighbors;
   }
 
@@ -129,7 +148,7 @@ class Game extends React.Component {
   };
 
   render() {
-    const { cells, interval, isRunning } = this.state;
+    const { cells, isRunning } = this.state;
     return (
       <div>
         <div
@@ -140,9 +159,6 @@ class Game extends React.Component {
             backgroundSize: `${CELL_SIZE}px ${CELL_SIZE}px`
           }}
           onClick={this.handleClick}
-          ref={(n) => {
-            this.boardRef = n;
-          }}
         >
           {cells.map((cell) => (
             <Cell x={cell.x} y={cell.y} key={`${cell.x},${cell.y}`} />
